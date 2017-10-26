@@ -141,7 +141,8 @@ class CaseMapper(object):
             for testrail_case in suitable_cases:
                 mapping.append((testrail_case, xunit_case))
 
-        if len(mapping) == 0 and all([len(xunit_suite), len(testrail_cases)]):
+        if len(mapping) == 0 and all([xunit_suite.countTestCases(),
+                                      len(testrail_cases)]):
             self.print_pair_data(testrail_cases[-1], xunit_case)
         self._check_collisions(mapping)
         return dict(mapping)
