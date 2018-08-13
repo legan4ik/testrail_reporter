@@ -2,10 +2,12 @@
 .cache/
 .eggs/
 dist/
+build/
 */__pycache__
 .tox
 *.egg-info/
 .coverage
+.pytest_cache/
 
 testrail_reporter/_version.py*
 
