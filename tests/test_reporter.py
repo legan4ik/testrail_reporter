@@ -6,41 +6,12 @@ import pytest
 import six
 from six.moves import StringIO
 
-from xunit2testrail import Reporter
 from xunit2testrail.testrail.client import Case
 
 if six.PY2:
     import mock
 else:
     from unittest import mock
-
-
-@pytest.fixture
-def testrail_client(mocker):
-    fake_statuses = mock.PropertyMock(return_value={1: 'passed', 2: 'skipped'})
-    mocker.patch(
-        'xunit2testrail.reporter.TrClient.statuses',
-        new_callable=fake_statuses)
-    return
-
-
-@pytest.fixture
-def reporter(testrail_client):
-    reporter = Reporter(
-        xunit_report='tests/xunit_files/report.xml',
-        env_description='vlan_ceph',
-        test_results_link="http://test_job/",
-        case_mapper=None,
-        paste_url='http://example.com/')
-    reporter.config_testrail(
-        base_url="https://testrail",
-        username="user",
-        password="password",
-        milestone="0.1",
-        project="Test Project",
-        tests_suite="Test Suite",
-        plan_name="Plan name")
-    return reporter
 
 
 @pytest.fixture

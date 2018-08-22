@@ -71,8 +71,8 @@ def test_extract_case_uuid(case_name, expected_id):
 ))  # yapf: disable
 def test_match_templates(x_tpl, tr_tpl, template_mapper, map_len, xcase_data,
                          tcase_data):
-    from xunit2testrail.vendor.xunitparser import TestCase as XunitCase
-    xunit_case = XunitCase(**xcase_data)
+    from xunit2testrail.vendor import xunitparser
+    xunit_case = xunitparser.TestCase(**xcase_data)
     case = client.Case(**tcase_data)
 
     template_mapper.xunit_name_template = x_tpl
@@ -99,8 +99,8 @@ def test_match_templates(x_tpl, tr_tpl, template_mapper, map_len, xcase_data,
       '{id}', 1), ))
 def test_match_case(template_mapper, methodname, match_value, x_name_template,
                     map_len):
-    from xunit2testrail.vendor.xunitparser import TestCase as XunitCase
-    xunit_case = XunitCase(classname='a.b.C', methodname=methodname)
+    from xunit2testrail.vendor import xunitparser
+    xunit_case = xunitparser.TestCase(classname='a.b.C', methodname=methodname)
     case = client.Case(custom_report_label=match_value)
     template_mapper.xunit_name_template = x_name_template
     result = template_mapper.get_suitable_cases(xunit_case, [case])
@@ -108,8 +108,8 @@ def test_match_case(template_mapper, methodname, match_value, x_name_template,
 
 
 def test_empty_xunit_id(template_mapper, caplog):
-    from xunit2testrail.vendor.xunitparser import TestCase as XunitCase
-    xunit_case = XunitCase(classname='a.b.C', methodname='test_e[1]')
+    from xunit2testrail.vendor import xunitparser
+    xunit_case = xunitparser.TestCase(classname='a.b.C', methodname='test_e[1]')
     template_mapper.xunit_name_template = '{id}'
     case = client.Case(custom_report_label=None)
     result = template_mapper.get_suitable_cases(xunit_case, [case])
@@ -151,13 +151,15 @@ def check_mapping(result, expected_dict):
         {}
     )),
 ))  # yapf: disable
-def test_map_cases(template_mapper, xunit_names, testrail_names, expected):
-    from xunit2testrail.vendor.xunitparser import TestCase as XunitCase
-    xunit_cases = [XunitCase(classname='a.b.C',
-                             methodname=x) for x in xunit_names]
+def test_map_cases(template_mapper, suite, milestone,
+                   xunit_names, testrail_names, expected):
+    from xunit2testrail.vendor import xunitparser
+    xunit_cases = xunitparser.TestSuite([
+        xunitparser.TestCase(classname='a.b.C', methodname=x) for x in xunit_names])
     testrail_cases = [client.Case(custom_report_label=x,
                            title=x) for x in testrail_names]
-    check_mapping(template_mapper.map(xunit_cases, testrail_cases), expected)
+    check_mapping(template_mapper.map(xunit_cases, testrail_cases,
+                                      suite, milestone.id), expected)
 
 
 @pytest.mark.parametrize('xunit_names, testrail_names, log_strings', (
@@ -177,29 +179,28 @@ def test_map_cases(template_mapper, xunit_names, testrail_names, expected):
         ['test_a[(12345)]', 'title_12345']
     ),
 ))  # yapf: disable
-def test_error_map_logging(template_mapper, xunit_names, testrail_names,
-                           log_strings, caplog):
-    from xunit2testrail.vendor.xunitparser import TestCase as XunitCase
-    xunit_cases = [
-        XunitCase(classname='a.b.C', methodname=x) for x in xunit_names
-    ]
+def test_error_map_logging(template_mapper, suite, milestone,
+                           xunit_names, testrail_names, log_strings, caplog):
+    from xunit2testrail.vendor import xunitparser
+    xunit_cases = xunitparser.TestSuite([
+        xunitparser.TestCase(classname='a.b.C', methodname=x) for x in xunit_names
+    ])
     testrail_cases = [
         client.Case(custom_report_label=x, title='title_{}'.format(x))
         for x in testrail_names
     ]
     try:
-        template_mapper.map(xunit_cases, testrail_cases)
+        template_mapper.map(xunit_cases, testrail_cases, suite, milestone.id)
     except Exception:
         pass
     assert all([x in caplog.text for x in log_strings])
 
 
-def test_no_testrail_case_logging(caplog, template_mapper):
-    from xunit2testrail.vendor.xunitparser import TestCase as XunitCase
-
-    xunit_case = XunitCase(classname='a.b.C', methodname='d[(12345)]')
+def test_no_testrail_case_logging(caplog, template_mapper, suite, milestone):
+    from xunit2testrail.vendor import xunitparser
+    xunit_case = xunitparser.TestCase(classname='a.b.C', methodname='d[(12345)]')
     testrail_case = client.Case(custom_report_label='123456')
-    template_mapper.map([xunit_case], [testrail_case])
+    template_mapper.map(xunitparser.TestSuite([xunit_case]), [testrail_case], suite, milestone.id)
     expected = "`{}` doesn't match".format(xunit_case)
     assert expected in caplog.text
 

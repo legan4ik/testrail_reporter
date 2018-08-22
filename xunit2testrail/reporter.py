@@ -45,7 +45,9 @@ class Reporter(object):
 
     def config_testrail(self, base_url, username, password, milestone, project,
                         tests_suite, plan_name, send_skipped=False,
-                        use_test_run_if_exists=False, send_duplicates=False):
+                        use_test_run_if_exists=False, send_duplicates=False,
+                        testrail_add_missing_cases=False, testrail_case_custom_fields=None,
+                        testrail_case_section_name=None, dry_run=False):
         self._config['testrail'] = dict(base_url=base_url,
                                         username=username,
                                         password=password, )
@@ -58,6 +60,10 @@ class Reporter(object):
         self.send_skipped = send_skipped
         self.send_duplicates = send_duplicates
         self.use_test_run_if_exists = use_test_run_if_exists
+        self.testrail_add_missing_cases = testrail_add_missing_cases
+        self.testrail_case_custom_fields = testrail_case_custom_fields or {}
+        self.testrail_case_section_name = testrail_case_section_name
+        self.dry_run = dry_run
 
     @property
     def testrail_client(self):
@@ -103,7 +109,7 @@ class Reporter(object):
                                           milestone_id=self.milestone.id)
             logger.debug('Created new plan "{}"'.format(self.plan_name))
         else:
-            logger.debug('Founded plan "{}"'.format(self.plan_name))
+            logger.debug('Found plan "{}"'.format(self.plan_name))
         return plan
 
     def get_xunit_test_suite(self):
@@ -212,7 +218,15 @@ class Reporter(object):
 
     def map_cases(self, xunit_suite):
         cases = self.suite.cases()
-        return self.case_mapper.map(xunit_suite, cases, self.send_duplicates)
+        return self.case_mapper.map(xunit_suite,
+                                    cases,
+                                    self.suite,
+                                    self.milestone.id,
+                                    self.send_duplicates,
+                                    self.testrail_add_missing_cases,
+                                    self.testrail_case_custom_fields,
+                                    self.testrail_case_section_name,
+                                    self.dry_run)
 
     def fill_case_results(self, mapping):
         filtered_cases = []

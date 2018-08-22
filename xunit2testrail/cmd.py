@@ -2,6 +2,7 @@
 
 import argparse
 import functools
+import json
 import logging
 import os
 import sys
@@ -41,6 +42,8 @@ def parse_args(args):
         'TESTRAIL_PROJECT': 'Mirantis OpenStack',
         'TESTRAIL_MILESTONE': '9.0',
         'TESTRAIL_TEST_SUITE': '[{0.testrail_milestone}] MOSQA',
+        'TESTRAIL_CASE_CUSTOM_FIELDS': {"custom_qa_team": "9", },
+        'TESTRAIL_CASE_SECTION_NAME': 'All',
         'XUNIT_REPORT': 'report.xml',
         'XUNIT_NAME_TEMPLATE': '{id}',
         'TESTRAIL_NAME_TEMPLATE': '{custom_report_label}',
@@ -123,6 +126,22 @@ def parse_args(args):
         type=str_cls,
         default=defaults['TESTRAIL_TEST_SUITE'],
         help='testrail project suite name')
+    parser.add_argument(
+        '--testrail-add-missing-cases',
+        action='store_true',
+        default=False,
+        help='Update testrail suite with new cases from xunit report')
+    parser.add_argument(
+        '--testrail-case-custom-fields',
+        type=json.loads,
+        default=defaults['TESTRAIL_CASE_CUSTOM_FIELDS'],
+        help=('Testrail custom fields for *new* cases in the suite in JSON format {"key": "id"}.'
+              ' Requires --testrail-add-missing-cases. To see available fields, use with --dry-run .'))
+    parser.add_argument(
+        '--testrail-case-section-name',
+        type=str_cls,
+        default=defaults['TESTRAIL_CASE_SECTION_NAME'],
+        help='Section name for *new* cases in the suite. Requires --testrail-add-missing-cases')
     parser.add_argument(
         '--send-skipped',
         action='store_true',
@@ -215,7 +234,11 @@ def main(args=None):
         tests_suite=suite,
         send_skipped=args.send_skipped,
         send_duplicates=args.send_duplicates,
-        use_test_run_if_exists=args.use_test_run_if_exists)
+        use_test_run_if_exists=args.use_test_run_if_exists,
+        testrail_add_missing_cases=args.testrail_add_missing_cases,
+        testrail_case_custom_fields=args.testrail_case_custom_fields,
+        testrail_case_section_name=args.testrail_case_section_name,
+        dry_run = args.dry_run)
 
     xunit_suite, _ = reporter.get_xunit_test_suite()
     mapping = reporter.map_cases(xunit_suite)

@@ -180,6 +180,32 @@ class Suite(Item):
             _list_url='get_cases/{}&suite_id={}'.format(self.project_id,
                                                         self.id))
 
+    @property
+    def sections(self):
+        url = 'get_sections/{}&suite_id={}'.format(self.project_id,
+                                                   self.id)
+        return self._handler('GET', url)
+
+    def get_custom_case_fields(self):
+        url = 'get_case_fields'
+        return self._handler('GET', url)
+
+    def get_section_by_name(self, section_name):
+        return [section for section in self.sections
+                if section['name'] == section_name][0]
+
+    def get_section_id(self, section_name):
+        return self.get_section_by_name(section_name)['id']
+
+    def add_section(self, name):
+        url = 'add_section/{}'.format(self.project_id)
+        data = {
+            'name': name,
+            'suite_id': self.id,
+        }
+        result = self._handler('POST', url, json=data)
+        return result
+
 
 class CaseCollection(Collection):
     def _add(self, name, data, **kwargs):
