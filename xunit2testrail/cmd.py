@@ -44,6 +44,7 @@ def parse_args(args):
         'TESTRAIL_TEST_SUITE': '[{0.testrail_milestone}] MOSQA',
         'TESTRAIL_CASE_CUSTOM_FIELDS': {"custom_qa_team": "9", },
         'TESTRAIL_CASE_SECTION_NAME': 'All',
+        'TESTRAIL_CASE_MAX_NAME_LENGHT': 0,
         'XUNIT_REPORT': 'report.xml',
         'XUNIT_NAME_TEMPLATE': '{id}',
         'TESTRAIL_NAME_TEMPLATE': '{custom_report_label}',
@@ -143,6 +144,12 @@ def parse_args(args):
         default=defaults['TESTRAIL_CASE_SECTION_NAME'],
         help='Section name for *new* cases in the suite. Requires --testrail-add-missing-cases')
     parser.add_argument(
+        '--testrail-case-max-name-lenght',
+        type=int,
+        default=defaults['TESTRAIL_CASE_MAX_NAME_LENGHT'],
+        help=('Truncate test case name lenght from the XML report to the specified value, '
+              'if TestRail has limited title lenght'))
+    parser.add_argument(
         '--send-skipped',
         action='store_true',
         default=False,
@@ -215,7 +222,8 @@ def main(args=None):
 
     case_mapper = TemplateCaseMapper(
         xunit_name_template=args.xunit_name_template,
-        testrail_name_template=args.testrail_name_template)
+        testrail_name_template=args.testrail_name_template,
+        testrail_case_max_name_lenght=args.testrail_case_max_name_lenght)
 
     reporter = Reporter(
         xunit_report=args.xunit_report,

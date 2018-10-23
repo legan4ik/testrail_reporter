@@ -198,14 +198,21 @@ class CaseMapper(object):
 class TemplateCaseMapper(CaseMapper):
     """Template string based mapper."""
 
-    def __init__(self, xunit_name_template, testrail_name_template, **kwargs):
+    def __init__(self, xunit_name_template, testrail_name_template,
+                 testrail_case_max_name_lenght=0, **kwargs):
         super(TemplateCaseMapper, self).__init__(**kwargs)
         self.xunit_name_template = xunit_name_template
         self.testrail_name_template = testrail_name_template
+        self.testrail_case_max_name_lenght = testrail_case_max_name_lenght
 
     def get_xunit_id(self, xunit_case):
+        """Extract xUnit case fields and compose a case title for TestRail"""
         xunit_dict = self.describe_xunit_case(xunit_case)
-        return self.xunit_name_template.format(**xunit_dict)
+        xunit_id = self.xunit_name_template.format(**xunit_dict)
+        if self.testrail_case_max_name_lenght:
+            return str(xunit_id)[:self.testrail_case_max_name_lenght]
+        else:
+            return xunit_id
 
     def get_suitable_cases(self, xunit_case, cases):
         try:
