@@ -47,10 +47,11 @@ class Reporter(object):
                         tests_suite, plan_name, send_skipped=False,
                         use_test_run_if_exists=False, send_duplicates=False,
                         testrail_add_missing_cases=False, testrail_case_custom_fields=None,
-                        testrail_case_section_name=None, dry_run=False):
+                        testrail_case_section_name=None, dry_run=False, request_timeout=600):
         self._config['testrail'] = dict(base_url=base_url,
                                         username=username,
-                                        password=password, )
+                                        password=password,
+                                        request_timeout=request_timeout)
         self.milestone_name = milestone
         self.project_name = project
         self.tests_suite_name = tests_suite

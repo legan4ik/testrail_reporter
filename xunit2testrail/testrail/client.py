@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import logging
+import random
 import time
 
 import requests
@@ -389,9 +390,10 @@ class Config(Item):
 
 
 class Client(object):
-    def __init__(self, base_url, username, password):
+    def __init__(self, base_url, username, password, request_timeout=600):
         self.username = username
         self.password = password
+        self.request_timeout = request_timeout
         self.base_url = base_url.rstrip('/') + '/index.php?/api/v2/'
 
         Item._handler = self._query
@@ -400,26 +402,50 @@ class Client(object):
         url = self.base_url + url
         headers = {'Content-type': 'application/json'}
         logger.debug('Make {} request to {}'.format(method, url))
-        for _ in range(5):
-            response = requests.request(
-                method,
-                url,
-                allow_redirects=False,
-                auth=(self.username, self.password),
-                headers=headers,
-                **kwargs)
-            # To many requests
-            if response.status_code == 429:
-                time.sleep(60)
-                continue
+
+        def _time_sleep(resp, min_interval=300, max_interval=600):
+            if resp is None:
+                logger.info("Connection error to {}".format(url))
             else:
-                break
-        # Redirect or error
-        if response.status_code >= 300:
-            raise requests.HTTPError("Wrong response:\n"
+                logger.info("Request error to {}\n"
+                            "Response: {}".format(url, resp))
+            sleep = random.randint(min_interval, max_interval)
+            logger.info("Waiting for {} sec until next try".format(sleep))
+            time.sleep(sleep)
+
+        start_time = time.time()
+        while True:
+            try:
+                response = requests.request(
+                    method,
+                    url,
+                    allow_redirects=False,
+                    auth=(self.username, self.password),
+                    headers=headers,
+                    **kwargs)
+                if response.status_code < 300:
+                    # Request processed successfuly
+                    break
+
+            except requests.ConnectionError:
+                response = None
+
+            if start_time + self.request_timeout > time.time():
+                _time_sleep(response)
+                continue
+
+            # Out of tries, raise an error
+            # ----------------------------
+
+            # Raise the original requests.ConnectionError
+            if response is None:
+                raise
+            # Redirect or error
+            raise requests.HTTPError("Wrong response after trying {1} sec:\n"
                                      "status_code: {0.status_code}\n"
                                      "headers: {0.headers}\n"
-                                     "content: '{0.content}'".format(response),
+                                     "content: '{0.content}'".format(response,
+                                                              self.request_timeout),
                                      response=response)
         result = response.json()
         if 'error' in result:

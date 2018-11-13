@@ -39,6 +39,7 @@ def parse_args(args):
         'TESTRAIL_URL': 'https://mirantis.testrail.com',
         'TESTRAIL_USER': 'user@example.com',
         'TESTRAIL_PASSWORD': 'password',
+        'TESTRAIL_REQUEST_TIMEOUT': 3200,
         'TESTRAIL_PROJECT': 'Mirantis OpenStack',
         'TESTRAIL_MILESTONE': '9.0',
         'TESTRAIL_TEST_SUITE': '[{0.testrail_milestone}] MOSQA',
@@ -52,7 +53,7 @@ def parse_args(args):
         'TESTRAIL_PLAN_NAME': None,
         'ENV_DESCRIPTION': '',
         'TEST_RESULTS_LINK': '',
-        'PASTE_BASE_URL': None
+        'PASTE_BASE_URL': None,
     }
     defaults = {k: os.environ.get(k, v) for k, v in defaults.items()}
 
@@ -112,6 +113,13 @@ def parse_args(args):
         type=str_cls,
         default=defaults['TESTRAIL_PASSWORD'],
         help='testrail password')
+    parser.add_argument(
+        '--testrail-request-timeout',
+        type=int,
+        default=defaults['TESTRAIL_REQUEST_TIMEOUT'],
+        help=('Timeout of waiting for a passed request to TestRail (HTTP status code < 300). '
+              'Covers cases like HTTP-429 "API Rate Limit" or HTTP-409 "maintenance". '
+              'During this period, the request will be repeated with random intervals (from 300 to 600 sec)'))
     parser.add_argument(
         '--testrail-project',
         type=str_cls,
@@ -246,7 +254,8 @@ def main(args=None):
         testrail_add_missing_cases=args.testrail_add_missing_cases,
         testrail_case_custom_fields=args.testrail_case_custom_fields,
         testrail_case_section_name=args.testrail_case_section_name,
-        dry_run = args.dry_run)
+        dry_run=args.dry_run,
+        request_timeout=args.testrail_request_timeout)
 
     xunit_suite, _ = reporter.get_xunit_test_suite()
     mapping = reporter.map_cases(xunit_suite)
