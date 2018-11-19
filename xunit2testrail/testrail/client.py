@@ -407,8 +407,10 @@ class Client(object):
             if resp is None:
                 logger.info("Connection error to {}".format(url))
             else:
-                logger.info("Request error to {}\n"
-                            "Response: {}".format(url, resp))
+                logger.info("Request error to {0}\n"
+                            "status_code: {1.status_code}\n"
+                            "headers: {1.headers}\n"
+                            "content: '{1.content}'".format(url, resp))
             sleep = random.randint(min_interval, max_interval)
             logger.info("Waiting for {} sec until next try".format(sleep))
             time.sleep(sleep)
