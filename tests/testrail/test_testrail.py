@@ -342,10 +342,10 @@ def test_add_results_for_cases(api_mock, client, suite, run):
     [200],
     [429, 200],
     [429, 429, 429, 429, 200],
-    pytest.mark.xfail([429, 429, 429, 429, 429, 200]),
-    pytest.mark.xfail([300]),
-    pytest.mark.xfail([400]),
-    pytest.mark.xfail([500]), ))
+    pytest.param([429, 429, 429, 429, 429, 200], marks=pytest.mark.xfail),
+    pytest.param([300], marks=pytest.mark.xfail),
+    pytest.param([400], marks=pytest.mark.xfail),
+    pytest.param([500], marks=pytest.mark.xfail), ))
 def test_http_errors(api_mock, mocker, statuses):
     client = Client(
         base_url='http://testrail/', username='user', password='password')

@@ -140,16 +140,16 @@ def check_mapping(result, expected_dict):
         ['12345', 'test_b'],
         {'12345': 'test_a[(12345)]'}
     ),
-    xfail((
+    pytest.param(
         ['test_a[(12345)]', 'test_b[(12345)]'],
         ['12345'],
-        {}
-    )),
-    xfail((
+        {},
+        marks=xfail),
+    pytest.param(
         ['test_a[(12345)]'],
         ['12345', '12345'],
-        {}
-    )),
+        {},
+        marks=xfail),
 ))  # yapf: disable
 def test_map_cases(template_mapper, suite, milestone,
                    xunit_names, testrail_names, expected):
