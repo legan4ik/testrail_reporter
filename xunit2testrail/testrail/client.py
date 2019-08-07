@@ -320,14 +320,11 @@ class Run(Item):
                 logger.debug('Adding {0} missing test cases '
                              'to the run'.format(len(missing_cases_ids)))
                 self.case_ids = cases_ids + missing_cases_ids
-                try:
-                    self.update()
-                except requests.HTTPError as e:
-                    if e.response.status_code != 403:
-                        raise
-                    # error 403 'operation is not allowed' means that the run
-                    # belongs to some plan and can't be edited independently
+                run_data = self.get(self.id)
+                if hasattr(run_data, 'plan_id') and run_data.plan_id:
                     Plan.get(id=self.plan_id).update_run(run=self)
+                else:
+                    self.update()
         return self.results.add_for_cases(self.id, cases)
 
 
