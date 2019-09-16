@@ -7,8 +7,11 @@ from xml.etree import ElementTree
 def to_timedelta(val):
     if val is None:
         return None
+    if "ms" in val:
+        secs = float(val.strip("ms")) / 1000
+    else:
+        secs = float(val.strip("s"))
 
-    secs = float(val)
     if math.isnan(secs):
         return None
 
