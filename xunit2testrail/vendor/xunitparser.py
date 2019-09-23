@@ -1,5 +1,6 @@
 import math
 import unittest
+import re
 from datetime import timedelta
 from xml.etree import ElementTree
 
@@ -7,10 +8,24 @@ from xml.etree import ElementTree
 def to_timedelta(val):
     if val is None:
         return None
-    if "ms" in val:
-        secs = float(val.strip("ms")) / 1000
+    reg = re.search('^[0-9]*.[0-9]*', val)
+    units = val.replace(reg.group(0), '').strip()
+    if units:
+        # godog report
+        if units == 's':
+            secs = float(reg.group(0))
+        elif units == 'ms':
+            secs = float(reg.group(0)) / 1000
+        elif 's' in units:
+            # process all smaller fractions
+            # of second as microseconds
+            secs = float(reg.group(0)) / 1000000
+        else:
+            # not a second
+            raise Exception("Cannot parse time field: {0}"
+                            .format(val))
     else:
-        secs = float(val.strip("s"))
+        secs = float(val)
 
     if math.isnan(secs):
         return None
