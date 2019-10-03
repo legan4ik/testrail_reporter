@@ -45,6 +45,7 @@ def parse_args(args):
         'TESTRAIL_TEST_SUITE': '[{0.testrail_milestone}] MOSQA',
         'TESTRAIL_CASE_CUSTOM_FIELDS': {"custom_qa_team": "9", },
         'TESTRAIL_CASE_SECTION_NAME': 'All',
+        'TESTRAIL_CONFIGURATION_NAME': None,
         'TESTRAIL_CASE_MAX_NAME_LENGHT': 0,
         'XUNIT_REPORT': 'report.xml',
         'XUNIT_NAME_TEMPLATE': '{id}',
@@ -152,6 +153,11 @@ def parse_args(args):
         default=defaults['TESTRAIL_CASE_SECTION_NAME'],
         help='Section name for *new* cases in the suite. Requires --testrail-add-missing-cases')
     parser.add_argument(
+        '--testrail_configuration_name',
+        type=str_cls,
+        default=defaults['TESTRAIL_CONFIGURATION_NAME'],
+        help='Name of the configuration to which test environment belongs to')
+    parser.add_argument(
         '--testrail-case-max-name-lenght',
         type=int,
         default=defaults['TESTRAIL_CASE_MAX_NAME_LENGHT'],
@@ -254,6 +260,7 @@ def main(args=None):
         testrail_add_missing_cases=args.testrail_add_missing_cases,
         testrail_case_custom_fields=args.testrail_case_custom_fields,
         testrail_case_section_name=args.testrail_case_section_name,
+        testrail_configuration_name=args.testrail_configuration_name,
         dry_run=args.dry_run,
         request_timeout=args.testrail_request_timeout)
 
@@ -262,7 +269,7 @@ def main(args=None):
     if not args.dry_run:
         cases = reporter.fill_case_results(mapping)
         if len(cases) == 0:
-            logger.warning('No cases matched, programm will terminated')
+            logger.warning('No cases matched, program will terminated')
             return
         plan = reporter.get_or_create_plan()
         test_run = reporter.get_or_create_test_run(plan, cases)
