@@ -300,9 +300,9 @@ class Reporter(object):
                 if len(already_created):
                     run_name = run_name_with_env
                     create_new_entry = False
-            return self.create_test_run(run_name, plan,
-                                        cases, config_ids,
-                                        selected_config if create_new_entry else None)
+        return self.create_test_run(run_name, plan,
+                                    cases, config_ids,
+                                    selected_config if create_new_entry else None)
 
     def print_run_url(self, test_run):
         print('[TestRun URL] {}'.format(test_run.url))
