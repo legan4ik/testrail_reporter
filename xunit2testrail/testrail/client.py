@@ -283,7 +283,7 @@ class Plan(Item):
         }
 
         result = self._handler('POST', url, json=entry)
-        new_run_data = result['runs'][0]
+        new_run_data = [r for r in result['runs'] if set(r['config_ids']) == set(run_data['config_ids'])][0]
         run.id = new_run_data.pop('id')
         run.data.update(new_run_data)
 

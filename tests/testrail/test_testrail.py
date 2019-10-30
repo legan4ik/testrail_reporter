@@ -187,7 +187,9 @@ def test_add_run_to_plan(api_mock, client, plan):
         'POST',
         re.compile(base + r'add_plan_entry/.*'),
         json={'runs': [{
-            'id': 8
+            'id': 8,
+            'config_ids': [16],
+            'name': 'test_run'
         }]},
         complete_qs=True)
 
