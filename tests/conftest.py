@@ -91,7 +91,8 @@ def _testrail_callback(data_kind):
     plan_response = {7: {'id': 7, 'project_id': 1, 'name': 'old_test_plan'},
                      8: {'id': 8, 'project_id': 1, 'name': 'new_test_plan',
                          'entries': [{'runs': [{'id': 13,
-                                                'name': 'some test run'}],
+                                                'name': 'some test run',
+                                                'config_ids': [9]}],
                                       'id': 12}]}}
     milestone_response = {8: {'id': 8, 'project_id': 1}}
     config_response = {9: {'id': 9, 'project_id': 1}}

@@ -292,8 +292,21 @@ class Plan(Item):
                  for _entry in self.entries for _run in _entry['runs']
                  if _run['id'] == run.id
                  ].pop()
+        config_ids = []
+        for _run in entry['runs']:
+            config_ids.extend(_run['config_ids'])
         url = 'update_plan_entry/{0}/{1}'.format(self.id, entry['id'])
-        entry.update(self._handler('POST', url, json=run.data))
+        update_data = {
+            'name': run.data['name'],
+            'description': run.data['description'],
+            'assignedto_id': run.data['assignedto_id'],
+            'include_all': run.data['include_all'],
+            'case_ids': run.data['case_ids'],
+        }
+        if config_ids:
+            update_data['config_ids'] = config_ids
+
+        entry.update(self._handler('POST', url, json=update_data))
 
 
 class Run(Item):

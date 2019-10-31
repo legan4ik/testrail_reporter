@@ -225,10 +225,16 @@ def test_update_run_in_plan(api_mock, client, project, plan):
     api_mock.register_uri(
         'POST',
         re.compile(base + 'update_plan_entry/{0}/.*'.format(plan.id)),
-        json={'runs': [{
-            'id': 13,
-            'case_ids': [10, 20, 30]
-        }]},
+        json={
+            "name": "test_run",
+            "description": "test description",
+            'assignedto_id': None,
+            'config_ids': [16],
+            'runs': [{
+                'id': 13,
+                'case_ids': [10, 20, 30],
+                'config_ids': [9]
+            }]},
         complete_qs=True)
 
     run_to_update = project.runs.find(plan_id=plan.id)
@@ -236,16 +242,12 @@ def test_update_run_in_plan(api_mock, client, project, plan):
 
     plan.update_run(run_to_update)
     expected = {
-        "suite_id": run_to_update.suite_id,
         "name": run_to_update.name,
         "description": run_to_update.description,
         "include_all": False,
         "case_ids": run_to_update.case_ids,
         "config_ids": run_to_update.config_ids,
-        "milestone_id": run_to_update.milestone_id,
-        "project_id": run_to_update.project_id,
         "assignedto_id": run_to_update.assignedto_id,
-        "plan_id": run_to_update.plan_id,
     }
     result = api_mock.request_history[-1].json()
 
