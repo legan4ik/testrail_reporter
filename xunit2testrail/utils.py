@@ -166,7 +166,7 @@ class CaseMapper(object):
                         logger.warning("Hey, this TC name is longer than 249 chars: {}".format(xunit_id))
                         print("Hey, this TC name is longer than 249 chars: {}".format(xunit_id))
                         hash = hashlib.md5(xunit_id.encode()).hexdigest()
-                        title = xunit_id[:212] + "...(" + hash + ")"
+                        title = " ".join(xunit_id[:212].split(" ")[:-1]) + "...(" + hash + ")"
                         print("\nNew TITLE: {}".format(title))
                         logger.warning("\nNew TITLE: {}".format(title))
                     else:
