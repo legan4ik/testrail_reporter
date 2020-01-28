@@ -220,7 +220,7 @@ class Parser(object):
         # add either the original "success" tc or a tc created by elements
         if len(tc.methodname) > 249:
             print("Hey, this TC name is longer than 249 chars: {}".format(tc.methodname))
-            tc.methodname = tc.methodname[:225] + " " + hash(tc.methodname)
+            tc.methodname = tc.methodname[:225] + " " + str(hash(tc.methodname))
         ts.addTest(tc)
 
     def parse_properties(self, el, ts):
