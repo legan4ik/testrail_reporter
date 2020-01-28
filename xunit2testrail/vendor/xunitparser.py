@@ -218,6 +218,7 @@ class Parser(object):
                 tc.stderr = e.text.strip()
 
         # add either the original "success" tc or a tc created by elements
+        print(tc)
         ts.addTest(tc)
 
     def parse_properties(self, el, ts):
