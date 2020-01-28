@@ -4,6 +4,7 @@ from uuid import UUID
 from collections import defaultdict
 import logging
 
+import hashlib
 import prettytable
 import six
 
@@ -161,8 +162,15 @@ class CaseMapper(object):
                     xunit_id = self.get_xunit_id(xunit_case)
 
                     steps = [{"": "passed"}, ]
+                    if len(xunit_id) > 249:
+                        print("Hey, this TC name is longer than 249 chars: {}".format(xunit_id))
+                        hash = hashlib.md5(xunit_id.encode()).hexdigest()
+                        title = xunit_id[:225] + " " + hash
+                        print("\nNew TITLE: {}".format(title))
+                    else:
+                        title = xunit_id
                     case = {
-                        "title": xunit_id,
+                        "title": title,
                         "milestone_id": testrail_milestone_id,
                         "custom_test_case_description": xunit_id,
                         "custom_test_case_steps": steps,
