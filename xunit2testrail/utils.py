@@ -163,10 +163,12 @@ class CaseMapper(object):
 
                     steps = [{"": "passed"}, ]
                     if len(xunit_id) > 249:
+                        logger.warning("Hey, this TC name is longer than 249 chars: {}".format(xunit_id))
                         print("Hey, this TC name is longer than 249 chars: {}".format(xunit_id))
                         hash = hashlib.md5(xunit_id.encode()).hexdigest()
-                        title = xunit_id[:225] + " " + hash
+                        title = xunit_id[:217] + " " + hash
                         print("\nNew TITLE: {}".format(title))
+                        logger.warning("\nNew TITLE: {}".format(title))
                     else:
                         title = xunit_id
                     case = {
