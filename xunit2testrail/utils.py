@@ -159,22 +159,13 @@ class CaseMapper(object):
                     "any TestRail Case".format(xunit_case))
 
                 if testrail_add_missing_cases:
-                    xunit_id = self.get_xunit_id(xunit_case)
+                    xunit_id = self.get_xunit_id(xunit_case, use_hash=True)
 
                     steps = [{"": "passed"}, ]
-                    if len(xunit_id) > 249:
-                        logger.warning("Hey, this TC name is longer than 249 chars: {}".format(xunit_id))
-                        print("Hey, this TC name is longer than 249 chars: {}".format(xunit_id))
-                        hash = hashlib.md5(xunit_id.encode()).hexdigest()
-                        title = " ".join(xunit_id[:212].split(" ")[:-1]) + "...(" + hash + ")"
-                        print("\nNew TITLE: {}".format(title))
-                        logger.warning("\nNew TITLE: {}".format(title))
-                    else:
-                        title = xunit_id
                     case = {
-                        "title": title.strip(),
+                        "title": xunit_id.strip(),
                         "milestone_id": testrail_milestone_id,
-                        "custom_test_case_description": xunit_id,
+                        "custom_test_case_description": self.get_full_xunit_id(xunit_case),
                         "custom_test_case_steps": steps,
                     }
                     case.update(testrail_case_custom_fields or {})
@@ -217,14 +208,29 @@ class TemplateCaseMapper(CaseMapper):
         self.testrail_name_template = testrail_name_template
         self.testrail_case_max_name_lenght = testrail_case_max_name_lenght
 
-    def get_xunit_id(self, xunit_case):
+    def get_xunit_id(self, xunit_case, use_hash=False):
         """Extract xUnit case fields and compose a case title for TestRail"""
-        xunit_dict = self.describe_xunit_case(xunit_case)
-        xunit_id = self.xunit_name_template.format(**xunit_dict)
+        xunit_id = self.get_full_xunit_id(xunit_case)
+        limit = self.testrail_case_max_name_lenght
         if self.testrail_case_max_name_lenght:
-            return str(xunit_id)[:self.testrail_case_max_name_lenght]
+            if use_hash and len(xunit_id) > limit:
+                logger.warning("Hey, this TC name is longer than {0} chars: {1}".format(xunit_id, limit))
+                print("Hey, this TC name is longer than {0} chars: {1}".format(xunit_id, limit))
+                hash = hashlib.md5(xunit_id.encode()).hexdigest()
+                # 37 is 32 md5 string + "...()" 
+                xunit_id = " ".join(xunit_id[:limit-37].split(" ")[:-1]) + "...(" + hash + ")"
+                print("\nNew TITLE: {}".format(xunit_id))
+                logger.warning("\nNew TITLE: {}".format(xunit_id))
+                return xunit_id
+            else:
+                return str(xunit_id)[:self.testrail_case_max_name_lenght]
         else:
             return xunit_id
+
+    def get_full_xunit_id(self, xunit_case):
+        xunit_dict = self.describe_xunit_case(xunit_case)
+        xunit_id = self.xunit_name_template.format(**xunit_dict)
+        return xunit_id
 
     def get_suitable_cases(self, xunit_case, cases):
         try:

@@ -1,6 +1,7 @@
 import math
 import unittest
 import re
+import hashlib
 from datetime import timedelta
 from xml.etree import ElementTree
 
@@ -218,6 +219,11 @@ class Parser(object):
                 tc.stderr = e.text.strip()
 
         # add either the original "success" tc or a tc created by elements
+        tc.methodname = tc.methodname.strip()
+        if len(tc.methodname) > 249:
+            hash = hashlib.md5(tc.methodname.encode()).hexdigest()
+            # 37 is 32 md5 string + "...()"
+            tc.methodname = " ".join(tc.methodname[:250-37].split(" ")[:-1]) + "...(" + hash + ")"
         ts.addTest(tc)
 
     def parse_properties(self, el, ts):
