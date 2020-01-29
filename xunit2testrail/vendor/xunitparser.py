@@ -218,12 +218,15 @@ class Parser(object):
             if e.tag == 'system-err' and e.text:
                 tc.stderr = e.text.strip()
 
-        # add either the original "success" tc or a tc created by elements
+        # get rid of any spaces at the end of tc name
         tc.methodname = tc.methodname.strip()
-        if len(tc.methodname) > 249:
+        # TestRail doesn't support tc titles >250 chars
+        if len(tc.methodname) > 250:
             hash = hashlib.md5(tc.methodname.encode()).hexdigest()
             # 37 is 32 md5 string + "...()"
-            tc.methodname = " ".join(tc.methodname[:250-37].split(" ")[:-1]) + "...(" + hash + ")"
+            tc.methodname = " ".join(tc.methodname[:250-37].split(" ")[:-1])\
+                            + "...(" + hash + ")"
+        # add either the original "success" tc or a tc created by elements
         ts.addTest(tc)
 
     def parse_properties(self, el, ts):
