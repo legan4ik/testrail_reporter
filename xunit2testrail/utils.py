@@ -159,15 +159,17 @@ class CaseMapper(object):
                     "any TestRail Case".format(xunit_case))
 
                 if testrail_add_missing_cases:
-                    xunit_id = self.get_xunit_id(xunit_case, use_hash=True)
+                    xunit_id = self.get_xunit_id(xunit_case)
 
                     steps = [{"": "passed"}, ]
                     case = {
-                        "title": xunit_id.strip(),
+                        "title": xunit_id,
                         "milestone_id": testrail_milestone_id,
-                        "custom_test_case_description": self.get_full_xunit_id(xunit_case),
+                        "custom_test_case_description": xunit_id,
                         "custom_test_case_steps": steps,
                     }
+                    if len(xunit_id) > 249:
+                        logger.warning("xunit_id: {}".format(xunit_id))
                     case.update(testrail_case_custom_fields or {})
 
                     testrail_section_name = testrail_case_section_name or "All"
