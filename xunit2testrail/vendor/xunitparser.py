@@ -49,6 +49,7 @@ class TestCase(unittest.TestCase):
         super(TestCase, self).__init__()
         self.classname = classname
         self.methodname = methodname
+        self.description = methodname
         self.report_id = id
 
     def __str__(self):
@@ -222,10 +223,8 @@ class Parser(object):
         tc.methodname = tc.methodname.strip()
         # TestRail doesn't support tc titles >250 chars
         if len(tc.methodname) > 250:
-            hash = hashlib.md5(tc.methodname.encode()).hexdigest()
-            # 37 is 32 md5 string + "...()"
-            tc.methodname = " ".join(tc.methodname[:250-37].split(" ")[:-1])\
-                            + "...(" + hash + ")"
+            hash = hashlib.md5(tc.methodname.encode()).hexdigest()[:5]
+            tc.methodname = tc.methodname[:250-10] + "...(" + hash + ")"
         # add either the original "success" tc or a tc created by elements
         ts.addTest(tc)
 
